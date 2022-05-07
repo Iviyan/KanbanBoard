@@ -1,0 +1,73 @@
+﻿using Task = KanbanBoard.Models.Task;
+
+namespace KanbanBoard.Controllers;
+
+[Route("/api")]
+[ApiController]
+public class TasksController : ControllerBase
+{
+    [HttpGet("projects/{id:int}/[controller]")]
+    public async Task<IActionResult> GetProjectTasks([FromServices] ApplicationContext context, int id)
+    {
+        if (!await context.Projects.AnyAsync(p => p.Id == id)) return Problem(title: "Project not found", statusCode: 404);
+        
+        var tasks = await context.Tasks
+            .OrderByDescending(p => p.Id)
+            .Where(t => t.ProjectId == id)
+            .Select(t => new
+            {
+                t.Id,
+                t.Name,
+                t.CreationDate,
+                t.UserId,
+                t.Status
+            })
+            .ToListAsync();
+
+        var users = await context.Users
+            .Where(u => tasks.Select(t => t.UserId).Distinct().Contains(u.Id))
+            .Select(u => new { u.Id, u.Name })
+            .ToListAsync();
+        
+        return Ok(new
+        {
+            Tasks = tasks
+                .GroupBy(t => t.Status)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(t => new { t.Id, t.Name, t.CreationDate, t.UserId })),
+            Users = users
+        });
+    }
+
+    [HttpGet("[controller]/{id:int}")]
+    public async Task<IActionResult> GetTask([FromServices] ApplicationContext context, int id)
+    {
+        var task = await context.Tasks.Where(t => t.Id == id).ProjectToType<TaskGetDto>().FirstOrDefaultAsync();
+        return task is {} ? Ok(task) : Problem(title: "Task not found", statusCode: 404);
+    }
+
+    [HttpPost("[controller]")]
+    public async Task<IActionResult> AddTask([FromServices] ApplicationContext context, [FromServices] RequestData requestData,
+        [FromBody] TaskPostDto newTask)
+    {
+        Task task = newTask.Adapt<Task>();
+        task.UserId = requestData.UserId!.Value;
+        task.CreationDate = DateTime.Now;
+        context.Tasks.Add(task);
+        await context.SaveChangesAsync();
+        
+        return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task.Adapt<TaskGetDto>());
+    }
+    
+    [HttpPatch("[controller]/{id:int}")]
+    public async Task<IActionResult> PathTask(
+        [FromServices] ApplicationContext context, int id,
+        [FromBody] TaskPatchDto taskPatch)
+    {
+        int c = await context.Tasks
+            .Where(t => t.Id == id)
+            .BatchUpdateAsync(taskPatch.Adapt<Task>(), taskPatch.ChangedProperties.ToList());
+        return c > 0 ? Ok() : Problem(title: "Task not found", statusCode: 404);
+    }
+}
