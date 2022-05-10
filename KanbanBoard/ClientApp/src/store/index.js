@@ -1,5 +1,4 @@
 import { createStore } from 'vuex'
-import app from './modules/app'
 import auth from './modules/auth'
 import createMultiTabState from 'vuex-multi-tab-state';
 import { call_get } from '@/utils/api';

@@ -54,7 +54,7 @@ const routes = [
     component: HomeView,
     beforeEnter: ifAuthenticated,
     children: [
-      { path: 'project/:id', component: ProjectView, props: true },
+      { path: 'project/:id(\\d+)', component: ProjectView, props: route => ({ id: Number(route.params.id) }) },
     ]
   },
   { path: '/:catchAll(.*)*', redirect: '/' }

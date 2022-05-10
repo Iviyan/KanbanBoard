@@ -138,7 +138,6 @@ main {
 }
 .sidebar .projects > a:hover {
     color: rgb(103, 130, 133);
-    
 }
 .sidebar .create-project-btn {
     border-width: 1px;
@@ -157,7 +156,7 @@ main {
     margin: 0;
     border-radius: 0.25em;
     width: 100%;
-        box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .dform input:focus {
@@ -173,9 +172,6 @@ main {
     color: #FFF;
     font-weight: bold;
     border: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    -o-appearance: none;
     appearance: none;
 }
 
