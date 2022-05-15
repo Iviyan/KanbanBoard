@@ -34,11 +34,24 @@ CREATE TABLE tasks
     status task_status not null default 'planned'
 );
 
-insert into users(email, password, name) values ('a@a.a', '123', 'Ivan'), ('b@b.b', '123', 'Sergey');
-insert into projects(name, user_id) values ('test1', 1);
-insert into tasks(name, text, user_id, project_id, creation_date, status) values
-    ('test task', '', 1, 1, '01.01.2022', default),
-    ('test task 2', '', 2, 1, '01.01.2022', 'planned'),
-    ('ongoing task 1', '', 1, 1, '01.01.2022', 'ongoing'),
-    ('ongoing task 2', '', 2, 1, '01.01.2022', 'ongoing'),
-    ('completed task', '', 1, 1, '01.01.2022', 'completed');
+create index tasks_project_id_index on tasks(project_id);
+
+CREATE TABLE comments
+(
+    id serial PRIMARY KEY,
+    text varchar(5000) not null,
+    user_id integer NOT NULL REFERENCES users(id),
+    task_id integer NOT NULL REFERENCES tasks(id),
+    creation_date timestamp NOT NULL
+);
+
+create index comments_task_id_index on comments(task_id);
+
+-- insert into users(email, password, name) values ('a@a.a', '123', 'Ivan'), ('b@b.b', '123', 'Sergey');
+-- insert into projects(name, user_id) values ('test1', 1);
+-- insert into tasks(name, text, user_id, project_id, creation_date, status) values
+--                                                                               ('test task', '', 1, 1, '01.01.2022', default),
+--                                                                               ('test task 2', '', 2, 1, '01.01.2022', 'planned'),
+--                                                                               ('ongoing task 1', '', 1, 1, '01.01.2022', 'ongoing'),
+--                                                                               ('ongoing task 2', '', 2, 1, '01.01.2022', 'ongoing'),
+--                                                                               ('completed task', '', 1, 1, '01.01.2022', 'completed');

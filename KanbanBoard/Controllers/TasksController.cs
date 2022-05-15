@@ -14,10 +14,12 @@ public class TasksController : ControllerBase
         var tasks = await context.Tasks
             .OrderByDescending(p => p.Id)
             .Where(t => t.ProjectId == id)
+            .OrderBy(t => t.Id)
             .Select(t => new
             {
                 t.Id,
                 t.Name,
+                t.Text,
                 t.CreationDate,
                 t.UserId,
                 t.Status
@@ -35,7 +37,7 @@ public class TasksController : ControllerBase
                 .GroupBy(t => t.Status)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(t => new { t.Id, t.Name, t.CreationDate, t.UserId })),
+                    g => g.Select(t => new { t.Id, t.Name, t.Text, t.CreationDate, t.UserId })),
             Users = users
         });
     }
@@ -60,6 +62,13 @@ public class TasksController : ControllerBase
         return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task.Adapt<TaskGetDto>());
     }
     
+    [HttpDelete("[controller]/{id:int}")]
+    public async Task<IActionResult> DeleteTask([FromServices] ApplicationContext context, int id)
+    {
+        int c = await context.Tasks.Where(t => t.Id == id).BatchDeleteAsync();
+        return c > 0 ? StatusCode(204) : Problem(title: "Task not found", statusCode: 404);
+    }
+    
     [HttpPatch("[controller]/{id:int}")]
     public async Task<IActionResult> PathTask(
         [FromServices] ApplicationContext context, int id,
@@ -68,6 +77,6 @@ public class TasksController : ControllerBase
         int c = await context.Tasks
             .Where(t => t.Id == id)
             .BatchUpdateAsync(taskPatch.Adapt<Task>(), taskPatch.ChangedProperties.ToList());
-        return c > 0 ? Ok() : Problem(title: "Task not found", statusCode: 404);
+        return c > 0 ? StatusCode(204) : Problem(title: "Task not found", statusCode: 404);
     }
 }

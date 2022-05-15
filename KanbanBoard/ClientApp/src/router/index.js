@@ -3,12 +3,12 @@ import { useStore } from 'vuex'
 import store from '../store'
 
 import PassThrough from '../components/PassThrough.vue'
-import LoginView from '../views/Login.vue'
-import RegisterView from '../views/Register.vue'
+import LogRegView from '../views/LogReg.vue'
 
 //const store = useStore();
 
 const HomeView = () => import(/* webpackChunkName: "home" */ '../views/Home.vue')
+const ProfileView = () => import(/* webpackChunkName: "home" */ '../views/Profile.vue')
 const ProjectView = () => import(/* webpackChunkName: "home" */ '../views/Project.vue')
 
 const ifNotAuthenticated = (to, from) => { console.log('login page redirect')
@@ -30,21 +30,21 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: RegisterView,
+    component: LogRegView,
     props: { action: 'login' },
     beforeEnter: ifNotAuthenticated
   },
   {
     path: '/register',
     name: 'register',
-    component: RegisterView,
+    component: LogRegView,
     props: { action: 'register' },
     beforeEnter: ifNotAuthenticated,
   },
   {
     path: '/reset-password',
     name: 'reset-password',
-    component: RegisterView,
+    component: LogRegView,
     props: { action: 'reset-password' },
     beforeEnter: ifNotAuthenticated,
   },
@@ -54,6 +54,7 @@ const routes = [
     component: HomeView,
     beforeEnter: ifAuthenticated,
     children: [
+      { path: 'profile', component: ProfileView, beforeEnter: () => console.log('profile') },
       { path: 'project/:id(\\d+)', component: ProjectView, props: route => ({ id: Number(route.params.id) }) },
     ]
   },

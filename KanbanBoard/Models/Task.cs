@@ -36,12 +36,22 @@ public class TaskPatchDto : PatchDtoBase
 
 public record TaskGetDto(int Id, string Name, string Text, int UserId, DateTime CreationDate, TaskStatus Status);
 
-public class TaskValidator : AbstractValidator<TaskPostDto>
+public class TaskPostValidator : AbstractValidator<TaskPostDto>
 {
-    public TaskValidator()
+    public TaskPostValidator()
     {
         RuleFor(task => task.Name).NotNull().Length(1, 50);
         RuleFor(task => task.Text).NotNull().Length(0, 5000);
         RuleFor(task => task.ProjectId).NotNull();
+        RuleFor(task => task.Status).NotNull();
+    }
+}
+
+public class TaskPatchValidator : AbstractValidator<TaskPatchDto>
+{
+    public TaskPatchValidator()
+    {
+        RuleFor(task => task.Name).Length(1, 50);
+        RuleFor(task => task.Text).Length(0, 5000);
     }
 }

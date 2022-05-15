@@ -13,7 +13,7 @@
 </div>
     <Modal ref="createProjectModal">
         <template v-slot:header>
-            <h5 class="modal-title" id="exampleModalLabel">Create project</h5>
+            <h5 class="modal-title">Create project</h5>
         </template>
 
             <template v-slot:body>
@@ -120,7 +120,7 @@ main {
     text-align: center;
     display: inline-block;
     text-decoration: none;
-    color: rgb(0, 53, 83);
+    color: #000;
     border: 1px solid #555555;
     margin: 0 4px;
 }
@@ -149,7 +149,7 @@ main {
 /* ----- */
 
 
-.dform input {
+.dform input, .dform textarea {
     border: 1px solid #d2d8d8;
     appearance: none;
     padding: 12px 20px 12px 20px;
@@ -157,9 +157,13 @@ main {
     border-radius: 0.25em;
     width: 100%;
 	box-sizing: border-box;
+    font-size: 1rem;
+}
+.dform textarea {
+    min-height: 72px;
 }
 
-.dform input:focus {
+.dform input:focus, .dform textarea:focus {
     border-color: #343642;
     box-shadow: 0 0 5px rgb(52 54 66 / 10%);
     outline: none;
@@ -175,10 +179,16 @@ main {
     appearance: none;
 }
 
-.dform .error-message {
+.error-message {
 	margin: 1rem 0 0 0;
 	color: #c00;
 	text-align: center;
 	word-break: break-word;
+}
+
+/* --- */
+
+.hidden {
+    display: none;
 }
 </style>

@@ -37,6 +37,10 @@ export default {
 		setUser(state, value) {
 			 state.user = value;
 			 localStorageSet('user', value);
+		},
+		patchUser(state, value) {
+			 state.user = {...state.user, ...value};
+			 localStorageSet('user', value);
 		}
 	},
 	actions: {

@@ -189,4 +189,37 @@ public class AccountController : ControllerBase
         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
         return encodedJwt;
     }
+    
+    [HttpPost("/change-password")]
+    public async Task<IActionResult> PathUser(
+        [FromServices] ApplicationContext context, int id,
+        [FromBody] ChangePasswordRequest model, [FromServices] RequestData requestData)
+    {
+        string? password = await context.Users
+            .Where(u => u.Id == requestData.UserId)
+            .Select(u => u.Password)
+            .FirstOrDefaultAsync();
+        
+        if (password is null)
+            return Problem(title: "User not found", statusCode: 404);
+        
+        if (password != model.OldPassword)
+            return Problem(title: "The old password does not match the current one", statusCode: 404);
+
+        int c = await context.Users
+            .Where(u => u.Id == requestData.UserId).BatchUpdateAsync(u => new User { Password = model.NewPassword });
+        
+        return c > 0 ? StatusCode(204) : Problem(title: "Unknown error", statusCode: 404);
+    }
+    
+    [HttpPatch("/profile")]
+    public async Task<IActionResult> PathUser(
+        [FromServices] ApplicationContext context, int id,
+        [FromBody] UserPatchDto userPatch, [FromServices] RequestData requestData)
+    {
+        int c = await context.Users
+            .Where(u => u.Id == requestData.UserId)
+            .BatchUpdateAsync(userPatch.Adapt<User>(), userPatch.ChangedProperties.ToList());
+        return c > 0 ? StatusCode(204) : Problem(title: "User not found", statusCode: 404);
+    }
 }

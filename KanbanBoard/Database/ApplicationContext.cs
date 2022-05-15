@@ -11,6 +11,7 @@ public class ApplicationContext : DbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<Project> Projects { get; set; } = null!;
     public DbSet<Task> Tasks { get; set; } = null!;
+    public DbSet<Comment> Comments { get; set; } = null!;
     
     static ApplicationContext()
         => NpgsqlConnection.GlobalTypeMapper.MapEnum<TaskStatus>("task_status");

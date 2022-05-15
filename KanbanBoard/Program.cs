@@ -53,7 +53,7 @@ services.AddControllersWithViews(options =>
         options.JsonSerializerOptions.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(SnakeCaseNamingPolicy.Instance));
         options.AllowInputFormatterExceptionMessages = false;
-        //options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
     })
     .AddFluentValidation(fv =>
     {

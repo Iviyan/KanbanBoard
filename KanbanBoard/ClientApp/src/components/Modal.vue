@@ -1,6 +1,6 @@
 <template>
 <div class="modal fade" ref="modalEl" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered" :class="{ ['modal-' + size]: size != null }">
     <div class="modal-content">
       <div class="modal-header">
 		    <slot name="header" />
@@ -21,6 +21,10 @@
     import { onMounted, ref } from 'vue';
     import { Modal } from 'bootstrap';
 
+    const props = defineProps({
+        size: { type: String, required: false }
+    })
+
     const modalEl = ref(null);
     var modal = null;
 
@@ -38,6 +42,10 @@
     })
 </script>
 
-<style scoped>
+<style>
+
+.modal-header {
+  word-break: break-all;
+}
 
 </style>

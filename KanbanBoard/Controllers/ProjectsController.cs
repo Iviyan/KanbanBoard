@@ -7,7 +7,7 @@ public class ProjectsController : ControllerBase
     [HttpGet("[controller]")]
     public async Task<IActionResult> GetProjects([FromServices] ApplicationContext context)
     {
-        return Ok(await context.Projects.ProjectToType<ProjectGetDto>().ToListAsync());
+        return Ok(await context.Projects.OrderBy(p => p.Id).ProjectToType<ProjectGetDto>().ToListAsync());
     }
     
     [HttpGet("[controller]/{id:int}")]
@@ -37,6 +37,6 @@ public class ProjectsController : ControllerBase
         int c = await context.Projects
             .Where(t => t.Id == id)
             .BatchUpdateAsync(projectPatch.Adapt<Project>(), projectPatch.ChangedProperties.ToList());
-        return c > 0 ? Ok() : Problem(title: "Project not found", statusCode: 404);
+        return c > 0 ? StatusCode(204) : Problem(title: "Project not found", statusCode: 404);
     }
 }
