@@ -12,6 +12,7 @@ public class ApplicationContext : DbContext
     public DbSet<Project> Projects { get; set; } = null!;
     public DbSet<Task> Tasks { get; set; } = null!;
     public DbSet<Comment> Comments { get; set; } = null!;
+    public DbSet<ProjectMember> ProjectMembers { get; set; } = null!;
     
     static ApplicationContext()
         => NpgsqlConnection.GlobalTypeMapper.MapEnum<TaskStatus>("task_status");
@@ -37,5 +38,10 @@ public class ApplicationContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresEnum<TaskStatus>(null, "task_status");
+
+        modelBuilder.Entity<ProjectMember>(builder =>
+        {
+            builder.HasKey(m => new { m.ProjectId, m.UserId });
+        });
     }
 }

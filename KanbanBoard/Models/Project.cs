@@ -25,7 +25,7 @@ public class ProjectPatchDto : PatchDtoBase
     public string? Name { get => name; set { name = value; SetHasProperty(); } }
 }
 
-public record ProjectGetDto(int Id, string Name);
+public record ProjectGetDto(int Id, string Name, int UserId);
 
 public class ProjectValidator : AbstractValidator<ProjectPostDto>
 {

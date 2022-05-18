@@ -2,6 +2,7 @@
 	<div class="project-header">
 		<h2>{{project?.name}}</h2>
 		<button @click="createTaskModal.show()">Add task</button>
+		<button v-if="project?.user_id === store.state.auth.user.id" @click="editProjectMembers()" style="margin-left: 10px;">Edit members</button>
 	</div>
 	<div class="row gx-3 kanban-board">
 		<div class="col-4" v-for="status in ['planned', 'ongoing', 'completed']">
@@ -93,7 +94,6 @@
 				</div>
 				<div class="write-comment">
 					<textarea
-						ref="commentTextInput"
 						v-autosize
 						v-model="commentText"
 						placeholder="Text"
@@ -103,6 +103,38 @@
 					<svg class="icon send-comment-btn" @click="sendComment"><use href="#icon-send" /></svg>
 				</div>
 				<p class="error-message">{{sendCommentError}}</p>
+			</div>
+		</template>
+
+        <template v-slot:footer></template>
+    </Modal>
+
+	<Modal ref="projectMembersModal" size="lg">
+        <template v-slot:header>
+            <h5 class="modal-title">Project members</h5>
+        </template>
+
+		<template v-slot:body>
+			<div class="">
+				<div>
+					<div class="project-member" v-for="member in members" :key="member.id">
+						<p>
+							<span class="project-member-email">{{member.email}}</span> |
+							<span class="project-member-name">{{member.name}}</span>
+						</p>
+						<svg class="icon" @click="deleteMember(member.id)"><use href="#icon-x" /></svg>
+					</div>
+				</div>
+				<div class="invitation">
+					<input
+						v-model="invitationEmail"
+						placeholder="User email"
+						class="form-control"
+						rows="1"
+						/>
+					<svg class="icon invite-btn" @click="addMember"><use href="#icon-invite" /></svg>
+				</div>
+				<p class="error-message">{{invitationError}}</p>
 			</div>
 		</template>
 
@@ -120,6 +152,9 @@
 			<symbol id="icon-x" viewBox="0 0 16 16">
 				<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
 			</symbol>
+			<symbol id="icon-invite" viewBox="0 0 16 16">
+				<path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+				<path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>			</symbol>
 		</defs>
 	</svg>
 </template>
@@ -137,37 +172,47 @@ const store = useStore();
 
 const props = defineProps({
     id: { type: Number }
-})
+});
 
-const project = ref()
+const project = ref();
 
-const tasks = ref({
+const tasks = reactive({
 	"planned": [],
 	"ongoing": [],
 	"completed": []
 });
 
+const members = ref([]);
+
 const createTaskModal = ref(null);
 const editTaskModal = ref(null);
 const taskModal = ref(null);
+const projectMembersModal = ref(null);
 
 const createTaskForm = reactive({
 	name: '',
 	text: '',
     error: ''
-})
+});
+
+
 const editTaskForm = reactive({
 	source: null,
 	name: '',
 	text: '',
     error: ''
-})
+});
+
 const selectedTask = reactive({
 	task: null,
 	comments: null
 });
+
 const commentText = ref('');
 const sendCommentError = ref('');
+
+const invitationEmail = ref('');
+const invitationError = ref('');
 
 function mapAuthors({items, users}) {
 	return items.map(item => {
@@ -195,15 +240,49 @@ function openTaskEditModal(task) {
 	editTaskModal.value.show()
 }
 
+async function editProjectMembers() {
+	projectMembersModal.value.show();
+	try {
+        let response = await call_get(`/api/projects/${project.value.id}/users`);
+        members.value = response;
+        console.log('members: ', response);
+    } catch (err) {
+        console.log('Members loading error: ', err.message);
+    }
+}
+
+async function addMember() {
+    try {
+        let response = await call_post(`/api/projects/${project.value.id}/users`, {
+			email: invitationEmail.value
+		});
+        members.value.push(response);
+		invitationEmail.value = invitationError.value = '';
+    } catch (err) {
+        console.log('Member adding error: ', err.message)
+        invitationError.value = err instanceof RequestError ? err.message : 'Request error';
+    }
+}
+
+async function deleteMember(memberId) {
+    try {
+        await call_delete(`/api/projects/${project.value.id}/users/${memberId}`);
+		members.value.splice(members.value.findIndex(t => t.id === memberId), 1);
+    } catch (err) {
+        console.log('Member deleting error: ', err.message)
+		invitationError.value = err instanceof RequestError ? err.message : 'Request error';
+    }
+}
+
+
 async function createTask() {
     try {
-        let response = await call_post('/api/tasks', {
+        let response = await call_post(`/api/projects/${project.value.id}/tasks`, {
 			name: createTaskForm.name,
-			text: createTaskForm.text,
-			project_id: project.value.id
+			text: createTaskForm.text
 		});
-        tasks.value.planned.push(response);
-        console.log('tasks: ', tasks.value);
+        tasks.planned.push(response);
+        console.log('tasks: ', tasks);
         createTaskModal.value.hide();
 		createTaskForm.name = createTaskForm.text = createTaskForm.error = '';
     } catch (err) {
@@ -232,7 +311,7 @@ async function deleteTask({status, id}) {
     try {
         await call_delete(`/api/tasks/${id}`);
 
-		let from = tasks.value[status];
+		let from = tasks[status];
 		let taskInd = from.findIndex(t => t.id === id);
 		from.splice(taskInd, 1);
     } catch (err) {
@@ -273,8 +352,8 @@ function dragOver(event) {
 }
 async function drop(event, target) {
 	const data = JSON.parse(event.dataTransfer.getData("text"));
-	let from = tasks.value[data.status];
-	let to = tasks.value[target];
+	let from = tasks[data.status];
+	let to = tasks[target];
 	let taskInd = from.findIndex(t => t.id === data.id);
 	let task = from[taskInd];
 	try {
@@ -282,9 +361,15 @@ async function drop(event, target) {
 		to.splice(binarySearch(to, t => t.id > task.id), 0, task);
 		from.splice(taskInd, 1);
 	} catch (e) {
-		console.log('An error occurred when changing the status of the task');
+		console.log('An error occurred when changing the status of the task: ', e);
 		// TODO: display it
 	}
+}
+
+function initTasks(res) {
+	for (let status in tasks) tasks[status] = [];
+	for (let status in res.tasks)
+		tasks[status] = mapAuthors({items: res.tasks[status], users: res.users})
 }
 
 watch(() => props.id, async (id, oldId) => {
@@ -294,7 +379,7 @@ watch(() => props.id, async (id, oldId) => {
 		let tasksCall = call_get(`/api/projects/${id}/tasks`);
 
 		project.value = await projectCall;
-		tasks.value = (await tasksCall).tasks;
+		initTasks(await tasksCall);
 	} catch(err) {
 		console.log('Loading tasks error:', err);
 		 alert('error')
@@ -439,6 +524,34 @@ const vAutosize = {
 	width: 16px;
 	height: 16px;
 	cursor: pointer;
+}
+
+
+.project-member:not(:last-child) {
+   margin-bottom: 8px;
+}
+.project-member {
+   display: flex;
+   margin-bottom: 10px;
+   align-items: center;
+}
+.project-member p {
+   flex-grow: 1;
+   margin: 0;
+}
+
+.invitation {
+	display: flex;
+	margin-top: 16px;
+}
+.invitation input {
+	flex-grow: 1;
+}
+.invitation .invite-btn {
+	fill: #555;
+    width: 22px;
+    height: 22px;
+    margin: 6px 0 0 8px;
 }
 
 </style>

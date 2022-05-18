@@ -207,7 +207,7 @@ public class AccountController : ControllerBase
             return Problem(title: "The old password does not match the current one", statusCode: 404);
 
         int c = await context.Users
-            .Where(u => u.Id == requestData.UserId).BatchUpdateAsync(u => new User { Password = model.NewPassword });
+            .Where(u => u.Id == requestData.UserId).BatchUpdateAsync(u => new User { Password = model.NewPassword! });
         
         return c > 0 ? StatusCode(204) : Problem(title: "Unknown error", statusCode: 404);
     }

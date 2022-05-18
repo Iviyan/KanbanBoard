@@ -19,7 +19,6 @@ public class TaskPostDto
 {
     public string? Name { get; set; }
     public string? Text { get; set; }
-    public int? ProjectId { get; set; }
     public TaskStatus? Status { get; set; } = TaskStatus.Planned;
 }
 
@@ -42,7 +41,6 @@ public class TaskPostValidator : AbstractValidator<TaskPostDto>
     {
         RuleFor(task => task.Name).NotNull().Length(1, 50);
         RuleFor(task => task.Text).NotNull().Length(0, 5000);
-        RuleFor(task => task.ProjectId).NotNull();
         RuleFor(task => task.Status).NotNull();
     }
 }

@@ -23,9 +23,14 @@ async function refreshToken() {
 
 // const isString = s => typeof s === 'string' || s instanceof String;
 
+function isEmpty(obj) {
+	for (var i in obj) return false;
+	return true;
+}
+
 async function get(url = '', data = {}) {
 	console.log('get | ', url, ' | ', data)
-	return await fetch(url + '?' + new URLSearchParams(data), {
+	return await fetch(url + (isEmpty(data) ? '' : '?' + new URLSearchParams(data)), {
 		method: 'GET',
 		headers: {
 			'Authorization': `Bearer ${store.state.auth.jwt}`,
