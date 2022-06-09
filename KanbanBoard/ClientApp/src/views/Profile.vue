@@ -27,7 +27,7 @@ import { RequestError } from "@/exceptions";
 const store = useStore();
 
 const editProfileForm = reactive({
-	name: '',
+	name: store.state.auth.user?.name ?? '',
     error: ''
 })
 
@@ -73,11 +73,11 @@ async function changePassword() {
 <style>
 
 .settings-form {
-	
+
 }
 
-.settings-form:not(:last-child) { 
-   margin-bottom: 24px;  
+.settings-form:not(:last-child) {
+   margin-bottom: 24px;
 }
 
 .settings-form h4 {

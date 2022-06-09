@@ -1,3 +1,10 @@
+drop table users;
+drop table refresh_tokens;
+drop table projects;
+drop table tasks;
+drop table comments;
+drop table project_members;
+
 CREATE TABLE users
 (
     id serial PRIMARY KEY,

@@ -15,7 +15,7 @@ async function refreshToken() {
 			store.commit('auth', json.access_token);
 			return true;
 		}
-		console.error('Refresh token update error.\n' + json);
+		console.error('Refresh token update error.\n', json);
 		store.dispatch('logout');
 		return false;
 	} finally { release(); }
@@ -107,7 +107,7 @@ export async function call(url = '', method = 'GET', data = {}) {
 			throw new RequestError(json);
 		}
 		throw new Error('Request execution error');
-	} 
+	}
 
 	let text = await response.text();
 	return text.length > 0 ? JSON.parse(text) : text;

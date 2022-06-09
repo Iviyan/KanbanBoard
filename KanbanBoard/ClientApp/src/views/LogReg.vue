@@ -26,8 +26,8 @@
 														<input class="full-width" type="submit" value="Login">
 												</p>
 										</form>
-										
-										<p class="cd-form-bottom-message"><router-link to="/reset-password">Forgot your password?</router-link></p>
+
+										<!-- <p class="cd-form-bottom-message"><router-link to="/reset-password">Forgot your password?</router-link></p> -->
 										<!-- <a href="#0" class="cd-close-form">Close</a> -->
 								</div> <!-- cd-login -->
 
@@ -124,7 +124,7 @@ const showPassword = reactive({
 	signup: false,
 });
 
-function tryLogin() { 
+function tryLogin() {
 	//console.log(loginForm, ' | ', loginForm.login);return;
 	store.dispatch('login', { login: loginForm.login, password: loginForm.password })
 	.then(() => {
@@ -139,7 +139,7 @@ function tryLogin() {
 	});
 }
 
-async function tryRegister() { 
+async function tryRegister() {
 	let res;
 	try {
 		res = await postj('/register', {
@@ -167,7 +167,7 @@ async function tryRegister() {
 </script>
 
 <style>
-/* -------------------------------- 
+/* --------------------------------
 
 Primary style
 
@@ -194,9 +194,9 @@ input::-ms-clear, textarea::-ms-clear {
 	display: none;
 }
 
-/* -------------------------------- 
+/* --------------------------------
 
-xsigin/signup popup 
+xsigin/signup popup
 
 -------------------------------- */
 .cd-user-modal {

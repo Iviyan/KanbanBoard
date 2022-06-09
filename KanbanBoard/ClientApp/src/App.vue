@@ -22,11 +22,11 @@ const globalProperties = app.appContext.config.globalProperties;
 let jwtChangeHandler = async (jwt, oldJwt) => {
 	if (!jwt) {
 		console.log('JWT clear');
-		//router.push('/login');
+		await router.push('/login');
 	} else {
 		if (!oldJwt) {
 			console.log('JWT set');
-			
+
 		} else {
 			console.log('JWT update');
 		}

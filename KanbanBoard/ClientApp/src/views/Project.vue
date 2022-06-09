@@ -3,6 +3,8 @@
 		<h2>{{project?.name}}</h2>
 		<button @click="createTaskModal.show()">Add task</button>
 		<button v-if="project?.user_id === store.state.auth.user.id" @click="editProjectMembers()" style="margin-left: 10px;">Edit members</button>
+		<button @click="editProjectModal.show()" style="margin-left: 10px;">Edit project</button>
+		<button v-if="project?.user_id === store.state.auth.user.id" @click="deleteProject()" style="margin-left: 10px;">Delete project</button>
 	</div>
 	<div class="row gx-3 kanban-board">
 		<div class="col-4" v-for="status in ['planned', 'ongoing', 'completed']">
@@ -27,6 +29,27 @@
 		</div>
 	</div>
 
+	<Modal ref="editProjectModal" size="lg">
+        <template v-slot:header>
+            <h5 class="modal-title">Edit project</h5>
+        </template>
+
+		<template v-slot:body>
+			<div class="dform">
+				<input type="text" placeholder="Name" v-model="editProjectForm.name">
+
+				<p class="error-message">{{editProjectForm.error}}</p>
+			</div>
+		</template>
+
+        <template v-slot:footer>
+            <div class="d-flex align-items-center justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" @click="editProjectModal.hide()">Close</button>
+                <button type="button" class="btn btn-outline-primary ms-2" @click="editProject">Edit</button>
+            </div>
+        </template>
+    </Modal>
+
 	<Modal ref="createTaskModal" size="lg">
         <template v-slot:header>
             <h5 class="modal-title">Create task</h5>
@@ -48,6 +71,7 @@
             </div>
         </template>
     </Modal>
+
 
 	<Modal ref="editTaskModal" size="lg">
         <template v-slot:header>
@@ -73,7 +97,10 @@
 
 	<Modal ref="taskModal" size="lg">
         <template v-slot:header>
-            <h5 class="modal-title">{{selectedTask?.task?.name}}</h5>
+			<div class="task-header">
+				<h5 class="modal-title">{{selectedTask?.task?.name}}</h5>
+				<p>{{ selectedTask?.task?.creation_date }} | {{ selectedTask?.task?.author?.name }}</p>
+			</div>
         </template>
 
 		<template v-slot:body>
@@ -102,7 +129,7 @@
 						/>
 					<svg class="icon send-comment-btn" @click="sendComment"><use href="#icon-send" /></svg>
 				</div>
-				<p class="error-message">{{sendCommentError}}</p>
+				<p class="error-message" v-if="sendCommentError">{{sendCommentError}}</p>
 			</div>
 		</template>
 
@@ -167,8 +194,10 @@ import { camelCaseToSentence } from "@/utils/stringUtils";
 import { call_get, call_post, call_delete, call_patch} from "@/utils/api";
 import Modal from '@/components/Modal.vue';
 import { RequestError } from "@/exceptions";
+import {useRouter} from "vue-router";
 
 const store = useStore();
+const router = useRouter();
 
 const props = defineProps({
     id: { type: Number }
@@ -184,17 +213,22 @@ const tasks = reactive({
 
 const members = ref([]);
 
+const editProjectModal = ref(null);
 const createTaskModal = ref(null);
 const editTaskModal = ref(null);
 const taskModal = ref(null);
 const projectMembersModal = ref(null);
+
+const editProjectForm = reactive({
+	name: '',
+    error: ''
+});
 
 const createTaskForm = reactive({
 	name: '',
 	text: '',
     error: ''
 });
-
 
 const editTaskForm = reactive({
 	source: null,
@@ -214,10 +248,34 @@ const sendCommentError = ref('');
 const invitationEmail = ref('');
 const invitationError = ref('');
 
+function deleteProject() {
+	call_delete(`/api/projects/${project.value.id}`)
+	.then(res => {
+		store.commit('deleteProject', project.value.id);
+		router.push('/');
+	})
+	.catch(err => console.log('Project deleting error: ', err.message));
+}
+
+async function editProject() {
+	try {
+		await call_patch(`/api/projects/${project.value.id}`, {
+			name: editProjectForm.name
+		});
+		project.value.name = editProjectForm.name;
+		store.commit('updateProject', { id: project.value.id, value: { name: editProjectForm.name } });
+		editProjectModal.value.hide();
+		editProjectForm.error = '';
+	} catch (err) {
+		console.error('Project editing error: ', err.message)
+		editProjectForm.error = err instanceof RequestError ? err.message : 'Request error';
+	}
+}
+
 function mapAuthors({items, users}) {
 	return items.map(item => {
 		let {user_id, ...obj} = item;
-		let user = users.find(u => u.id == user_id);
+		let user = users.find(u => u.id === user_id);
 		return {
 			author: user,
 			...obj
@@ -379,10 +437,11 @@ watch(() => props.id, async (id, oldId) => {
 		let tasksCall = call_get(`/api/projects/${id}/tasks`);
 
 		project.value = await projectCall;
+		editProjectForm.name = project.value.name;
 		initTasks(await tasksCall);
 	} catch(err) {
 		console.log('Loading tasks error:', err);
-		 alert('error')
+		router.push('/');
 	}
 }, { immediate: true })
 
@@ -477,7 +536,7 @@ const vAutosize = {
 	word-break: break-word;
 }
 
-.task-comments-heade {
+.task-comments-header {
 	margin: 0 0 8px;
 }
 
@@ -518,6 +577,11 @@ const vAutosize = {
     width: 22px;
     height: 22px;
     margin: 6px 0 0 8px;
+}
+
+.task-header p {
+	margin: 0;
+	color: #666;
 }
 
 .icon {

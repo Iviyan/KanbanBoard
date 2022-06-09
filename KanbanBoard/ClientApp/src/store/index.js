@@ -11,6 +11,12 @@ const store = createStore({
 	mutations: {
 		setProjects(state, value) { state.projects = value },
 		addProject(state, value) { state.projects.push(value) },
+		deleteProject(state, value) { state.projects.splice(state.projects.findIndex(t => t.id === value), 1) },
+		updateProject(state, {id, value}) {
+			let ind = state.projects.findIndex(t => t.id === id);
+			console.log(`projects (${id}) -> ${ind}`, state.projects, '\n>', { ...state.projects[ind], value });
+			state.projects[ind] = { ...state.projects[ind], ...value };
+		},
 	},
 	modules: {
 		auth

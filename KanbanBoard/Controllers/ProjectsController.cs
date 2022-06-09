@@ -8,12 +8,12 @@ public class ProjectsController : ControllerBase
     public async Task<IActionResult> GetProjects([FromServices] ApplicationContext context, [FromServices] RequestData requestData)
     {
         return Ok(
-             context.ProjectMembers
+             await context.ProjectMembers
                 .Where(p => p.UserId == requestData.UserId)
                 .Select(p => p.Project)
                 .OrderBy(p => p.Id)
                 .ProjectToType<ProjectGetDto>()
-                .ToList()
+                .ToListAsync()
             );
     }
     
@@ -43,22 +43,27 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project.Adapt<ProjectGetDto>());
     }
     
-    [HttpPatch("[controller]/{id:int}")]
+    [HttpDelete("[controller]/{id:int}"), ProjectAccessActionFilter]
+    public async Task<IActionResult> DeleteProject(int id,
+        [FromServices] ApplicationContext context)
+    {
+        int c = await context.Projects.Where(p => p.Id == id).BatchDeleteAsync();
+        return c > 0 ? StatusCode(204) : Problem(title: "Project not found", statusCode: 404);
+    }
+    
+    [HttpPatch("[controller]/{id:int}"), ProjectAccessActionFilter]
     public async Task<IActionResult> PathProject(int id,
         [FromServices] ApplicationContext context,
         [FromBody] ProjectPatchDto projectPatch,
         [FromServices] RequestData requestData)
     {
-        if (!context.ProjectMembers.Any(p => p.UserId == requestData.UserId && p.ProjectId == id))
-            return Problem(statusCode: 403);
-        
         int c = await context.Projects
             .Where(t => t.Id == id)
             .BatchUpdateAsync(projectPatch.Adapt<Project>(), projectPatch.ChangedProperties.ToList());
         return c > 0 ? StatusCode(204) : Problem(title: "Project not found", statusCode: 404);
     }
     
-    [HttpGet("[controller]/{id:int}/users")]
+    [HttpGet("[controller]/{id:int}/users"), ProjectAccessActionFilter]
     public async Task<IActionResult> GetProjectUsers(int id,
         [FromServices] ApplicationContext context,
         [FromServices] RequestData requestData)

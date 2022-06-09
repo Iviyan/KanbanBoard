@@ -58,7 +58,7 @@ const createProjectForm = reactive({
 
 async function logout() {
     try { await store.dispatch('logout'); }
-    finally { router.push('/login'); }
+    finally { await router.push('/login'); }
 }
 
 function openCreateProjectDialog() {

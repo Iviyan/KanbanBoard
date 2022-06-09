@@ -167,11 +167,3 @@ app.UseEndpoints(endpoints =>
 });
 
 app.Run();
-
-/*public class VerifyAuthorizationHandler : IAuthorizationHandler
-{
-    public Task HandleAsync(AuthorizationHandlerContext context)
-    {
-        
-    }
-}*/
