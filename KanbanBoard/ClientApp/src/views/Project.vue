@@ -3,7 +3,7 @@
 		<h2>{{project?.name}}</h2>
 		<button @click="createTaskModal.show()">Add task</button>
 		<button v-if="project?.user_id === store.state.auth.user.id" @click="editProjectMembers()" style="margin-left: 10px;">Edit members</button>
-		<button @click="editProjectModal.show()" style="margin-left: 10px;">Edit project</button>
+		<button v-if="project?.user_id === store.state.auth.user.id" @click="editProjectModal.show()" style="margin-left: 10px;">Edit project</button>
 		<button v-if="project?.user_id === store.state.auth.user.id" @click="deleteProject()" style="margin-left: 10px;">Delete project</button>
 	</div>
 	<div class="row gx-3 kanban-board">
@@ -149,7 +149,7 @@
 							<span class="project-member-email">{{member.email}}</span> |
 							<span class="project-member-name">{{member.name}}</span>
 						</p>
-						<svg class="icon" @click="deleteMember(member.id)"><use href="#icon-x" /></svg>
+						<svg class="icon" v-if="member.id !== store.state.auth.user.id" @click="deleteMember(member.id)"><use href="#icon-x" /></svg>
 					</div>
 				</div>
 				<div class="invitation">

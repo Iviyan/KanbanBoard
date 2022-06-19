@@ -1,5 +1,4 @@
 global using System.Text;
-global using System.Data;
 global using System.Text.Json;
 global using System.Diagnostics;
 global using System.Security.Claims;
@@ -10,8 +9,6 @@ global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Extensions.Options;
 global using Microsoft.AspNetCore.SpaServices;
-global using Microsoft.AspNetCore.Mvc.Authorization;
-global using Microsoft.AspNetCore.Http.Features;
 global using Microsoft.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;

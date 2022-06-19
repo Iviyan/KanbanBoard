@@ -132,6 +132,7 @@ function tryLogin() {
 		router.push("/");
 	})
 	.catch(err => {
+		console.log('login err')
 		if (err instanceof RequestError)
 			loginForm.error = err.message;
 		else
