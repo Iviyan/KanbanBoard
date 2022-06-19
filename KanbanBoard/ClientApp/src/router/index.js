@@ -11,9 +11,9 @@ const HomeView = () => import(/* webpackChunkName: "home" */ '../views/Home.vue'
 const ProfileView = () => import(/* webpackChunkName: "home" */ '../views/Profile.vue')
 const ProjectView = () => import(/* webpackChunkName: "home" */ '../views/Project.vue')
 
-const ifNotAuthenticated = (to, from) => { console.log('login page redirect')
+const ifNotAuthenticated = (to, from) => {
 	if (store.getters.isAuth) {
-    console.log('login page access denial')
+    	console.log(`"${to}" page access denial`)
 		return '/';
   }
 }

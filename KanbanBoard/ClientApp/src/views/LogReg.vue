@@ -148,22 +148,23 @@ async function tryRegister() {
 			password: regForm.password,
 			name: regForm.name
 		});
-	} catch (e) {
+
+		console.log('reg response: ', res);
+
+		let jwt = res.access_token;
+		console.log('jwt: ', jwt);
+		if (jwt) {
+			store.commit('auth', jwt);
+			regForm.error = '';
+			router.push("/");
+		}
+		else regForm.error = "Ошибка получения токена";
+	} catch (err) {
 		if (err instanceof RequestError)
 			regForm.error = err.message;
 		else
 			regForm.error = 'Request error';
 	}
-	console.log('reg response: ', res);
-
-	let jwt = res.access_token;
-	console.log('jwt: ', jwt);
-	if (jwt) {
-		store.commit('auth', jwt);
-		regForm.error = '';
-		router.push("/");
-	}
-	else regForm.error = "Ошибка получения токена";
 }
 </script>
 

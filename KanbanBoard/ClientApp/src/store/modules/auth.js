@@ -27,8 +27,10 @@ export default {
 			if (!!value) {
 				state.jwtData = jwt_decode(value);
 				localStorage.setItem('jwt', value);
-			} else
+			} else {
 				localStorage.removeItem('jwt');
+				localStorage.removeItem('user')
+			}
 		},
 		logout(state, value) {
 			state.jwt = state.jwtData = null;
@@ -45,8 +47,11 @@ export default {
 	},
 	actions: {
 		initAuth(ctx) {
-			ctx.commit('auth', localStorage.getItem('jwt'))
-			ctx.commit('setUser', JSON.parse(localStorage.getItem('user')))
+			let jwt = localStorage.getItem('jwt');
+			if (jwt) {
+				ctx.commit('auth', jwt);
+				ctx.commit('setUser', JSON.parse(localStorage.getItem('user')));
+			}
 		},
 
 		async login({ commit }, { login, password }) {
