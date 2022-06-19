@@ -52,8 +52,8 @@
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)dist\**" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-        <!--<RelativePath>%(DistFiles.Identity)</RelativePath>-->
-        <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <!--<RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>-->
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
       </ResolvedFileToPublish>

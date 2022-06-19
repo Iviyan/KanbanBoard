@@ -119,7 +119,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseSpaStaticFiles();
 
 app.UseRouting();
 
@@ -157,7 +157,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapToVueCliProxy(
         "{*path}",
         new SpaOptions { SourcePath = "ClientApp" },
-        npmScript: (System.Diagnostics.Debugger.IsAttached) ? "serve" : null,
+        npmScript: System.Diagnostics.Debugger.IsAttached ? "serve" : null,
         regex: "Compiled successfully",
         forceKill: true
         );

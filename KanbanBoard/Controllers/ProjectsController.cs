@@ -35,6 +35,9 @@ public class ProjectsController : ControllerBase
         [FromServices] RequestData requestData,
         [FromBody] ProjectPostDto newProject)
     {
+        if (await context.Projects.AnyAsync(p => p.Name == newProject.Name))
+            return Problem(title: "The project with this name already exists", statusCode: 400);
+            
         Project project = newProject.Adapt<Project>();
         project.UserId = requestData.UserId!.Value;
         context.Projects.Add(project);
